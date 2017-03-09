@@ -35,7 +35,7 @@ class ChannelListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "ChatChat."
+        title = "Channels"
         observeChannels()
     }
     
@@ -96,7 +96,8 @@ class ChannelListViewController: UITableViewController {
     // NOTE: UITableViewDelegate
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.section != Section.createNewChannelSection.rawValue && indexPath.section == Section.currentChannelsSection.rawValue {
+        // TO-DO: Not let user select first section
+        if indexPath.section == Section.currentChannelsSection.rawValue {
             let channel = channels[(indexPath as NSIndexPath).row]
             self.performSegue(withIdentifier: "ShowChannel", sender: channel)
         }
@@ -140,5 +141,19 @@ class ChannelListViewController: UITableViewController {
                 print("Error! Could not decode channel data")
             }
         })
+    }
+    
+    /// NOTE: Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        
+        if let channel = sender as? Channel {
+            let chatVc = segue.destination as! ChatViewController
+            
+            chatVc.senderDisplayName = senderDisplayName
+            chatVc.channel = channel
+            chatVc.channelRef = channelRef.child(channel.id)
+        }
     }
 }

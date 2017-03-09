@@ -7,30 +7,42 @@
 //
 
 import UIKit
+import Firebase
+import JSQMessagesViewController
 
-final class ChatViewController: UIViewController {
+final class ChatViewController: JSQMessagesViewController {
     
-    // MARK: Properties
+    /// NOTE: Properties
     
-    // MARK: View Lifecycle
+    var channelRef: FIRDatabaseReference?
+    var channel: Channel? {
+        didSet {
+            title = channel?.name
+        }
+    }
+    
+    /// NOTE: View Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Set the senderId based on the logged in Firebase user.
+        self.senderId = FIRAuth.auth()?.currentUser?.uid
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
     
-    // MARK: Collection view data source (and related) methods
+    /// NOTE: Collection view data source (and related) methods
     
     
-    // MARK: Firebase related methods
+    /// NOTE: Firebase related methods
     
     
-    // MARK: UI and User Interaction
+    /// NOTE: UI and User Interaction
     
     
-    // MARK: UITextViewDelegate methods
+    /// NOTE: UITextViewDelegate methods
     
 }

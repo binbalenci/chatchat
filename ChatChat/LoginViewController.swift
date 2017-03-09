@@ -11,10 +11,13 @@ import Firebase
 
 class LoginViewController: UIViewController {
     
+    /// NOTE: Properties
+    
     @IBOutlet weak var nameField: UITextField!
     @IBOutlet weak var bottomLayoutGuideConstraint: NSLayoutConstraint!
     
-    // NOTE: View Lifecycle
+    
+    /// NOTE: View Lifecycle
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -45,7 +48,8 @@ class LoginViewController: UIViewController {
         }
     }
     
-    // NOTE: - Notifications
+    
+    /// NOTE: Notifications
     
     // Move the bottomLayout up when keyboard shows
     func keyboardWillShowNotification(_ notification: Notification) {
@@ -58,7 +62,20 @@ class LoginViewController: UIViewController {
     func keyboardWillHideNotification(_ notification: Notification) {
         bottomLayoutGuideConstraint.constant = 125
     }
+ 
     
+    /// NOTE: Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        // Retrieve the destination view controller from segue and cast it to a UINavigationController
+        let navVc = segue.destination as! UINavigationController
+        // Cast the first view controller of the UINavigationController to a ChannelListViewController
+        let channelVc = navVc.viewControllers.first as! ChannelListViewController
+        
+        // Set the senderDisplayName in the ChannelListViewController to the name provided in the nameField by the user.
+        channelVc.senderDisplayName = nameField?.text
+    }
 }
 
 
