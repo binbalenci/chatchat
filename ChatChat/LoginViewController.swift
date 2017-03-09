@@ -7,13 +7,14 @@
 //
 
 import UIKit
+import Firebase
 
 class LoginViewController: UIViewController {
     
     @IBOutlet weak var nameField: UITextField!
     @IBOutlet weak var bottomLayoutGuideConstraint: NSLayoutConstraint!
     
-    // MARK: View Lifecycle
+    // NOTE: View Lifecycle
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -27,19 +28,35 @@ class LoginViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
     
-    @IBAction func loginDidTouch(_ sender: AnyObject) {
+    @IBAction func loginBtnPressed(_ sender: AnyObject) {
+        // Confirm the name is not empty
+        if nameField?.text != "" {
+            // Use the Firebase Auth API to sign in anonymously
+            FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
+                // Check to see if there is an authentication error
+                if let err = error {
+                    print(err.localizedDescription)
+                    return
+                }
+                
+               // Trigger the segue to move to the ChannelListViewController
+                self.performSegue(withIdentifier: "LoginToChat", sender: nil)
+            })
+        }
     }
     
-    // MARK: - Notifications
+    // NOTE: - Notifications
     
+    // Move the bottomLayout up when keyboard shows
     func keyboardWillShowNotification(_ notification: Notification) {
         let keyboardEndFrame = ((notification as NSNotification).userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         let convertedKeyboardEndFrame = view.convert(keyboardEndFrame, from: view.window)
         bottomLayoutGuideConstraint.constant = view.bounds.maxY - convertedKeyboardEndFrame.minY
     }
     
+    // Move it back down
     func keyboardWillHideNotification(_ notification: Notification) {
-        bottomLayoutGuideConstraint.constant = 48
+        bottomLayoutGuideConstraint.constant = 125
     }
     
 }
