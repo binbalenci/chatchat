@@ -39,6 +39,7 @@ class ChannelListViewController: UITableViewController {
         observeChannels()
     }
     
+    // Stop observing database changes when the view controller dies
     deinit {
         if let refHandle = channelRefHandle {
             channelRef.removeObserver(withHandle: refHandle)
@@ -89,6 +90,33 @@ class ChannelListViewController: UITableViewController {
         }
         
         return cell
+    }
+    
+    
+    // NOTE: UITableViewDelegate
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section != Section.createNewChannelSection.rawValue && indexPath.section == Section.currentChannelsSection.rawValue {
+            let channel = channels[(indexPath as NSIndexPath).row]
+            self.performSegue(withIdentifier: "ShowChannel", sender: channel)
+        }
+    }
+    
+    
+    /// NOTE: Actions
+    
+    @IBAction func createChannel(_ sender: AnyObject) {
+        // Check if there is a channel name
+        if let name = newChannelTextField?.text {
+            // Create a new channel reference with a unique key using childByAutoId()
+            let newChannelRef = channelRef.childByAutoId()
+            // Create a dictionary to hold the data for this channel.
+            let channelItem = [
+                "name": name
+            ]
+            // Set the name on this new channel, which is saved to Firebase automatically
+            newChannelRef.setValue(channelItem)
+        }
     }
     
     

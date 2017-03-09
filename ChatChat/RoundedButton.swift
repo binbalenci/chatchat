@@ -23,7 +23,7 @@ extension UIColor {
     }
 }
 
-var borderColor = UIColor(netHex:0x4A4A4A)
+var textColor = UIColor(netHex:0x4A4A4A)
 
 /* 
  Created a simple UIButton sublcass that uses the tintColor for its text
@@ -34,11 +34,11 @@ class RoundedButton: UIButton {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         layer.borderWidth = 1.0
-        layer.borderColor = borderColor.cgColor
+        layer.borderColor = textColor.cgColor
         layer.cornerRadius = self.bounds.size.height / 2
         clipsToBounds = true
         contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
-        setTitleColor(borderColor, for: .normal)
+        setTitleColor(textColor, for: .normal)
         setTitleColor(UIColor.white, for: .highlighted)
         //setBackgroundImage(UIImage(co`lor: tintColor), for: .highlighted)
     }
