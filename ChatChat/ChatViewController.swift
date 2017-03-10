@@ -25,6 +25,8 @@ final class ChatViewController: JSQMessagesViewController {
     lazy var incomingBubbleImageView: JSQMessagesBubbleImage = self.setupIncomingBubble()
     private lazy var messageRef: FIRDatabaseReference = self.channelRef!.child("messages")
     private var newMessageRefHandle: FIRDatabaseHandle?
+    private lazy var usersTypingQuery: FIRDatabaseQuery =
+        self.channelRef!.child("typingIndicator").queryOrderedByValue().queryEqual(toValue: true)
     
     /// NOTE: View Lifecycle
     
@@ -44,7 +46,8 @@ final class ChatViewController: JSQMessagesViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        }
+        observeTyping()
+    }
     
     /// NOTE: Collection view data source (and related) methods
     
@@ -121,6 +124,39 @@ final class ChatViewController: JSQMessagesViewController {
         })
     }
     
+    private func observeTyping() {
+        let typingIndicatorRef = channelRef!.child("typingIndicator")
+        userIsTypingRef = typingIndicatorRef.child(senderId)
+        userIsTypingRef.onDisconnectRemoveValue()
+        // Observe for changes using .value; this will call the completion block anytime it changes
+        usersTypingQuery.observe(.value) { (data: FIRDataSnapshot) in
+            // You're the only one typing, don't show the indicator
+            if data.childrenCount == 1 && self.isTyping {
+                return
+            }
+            
+            // Are there others typing?
+            self.showTypingIndicator = data.childrenCount > 0
+            self.scrollToBottom(animated: true)
+        }
+    }
+    
+    // Create a Firebase reference that tracks whether the local user is typing
+    private lazy var userIsTypingRef: FIRDatabaseReference =
+        self.channelRef!.child("typingIndicator").child(self.senderId)
+    // Store whether the local user is typing in a private property
+    private var localTyping = false
+    var isTyping: Bool {
+        get {
+            return localTyping
+        }
+        set {
+            // Use a computed property to update localTyping and userIsTypingRef each time it’s changed
+            localTyping = newValue
+            userIsTypingRef.setValue(newValue)
+        }
+    }
+    
     
     /// NOTE: UI and User Interaction
     
@@ -158,9 +194,17 @@ final class ChatViewController: JSQMessagesViewController {
         
         // Reset the input toolbar to empty
         finishSendingMessage()
+        
+        isTyping = false
     }
     
     
     /// NOTE: UITextViewDelegate methods
+    
+    override func textViewDidChange(_ textView: UITextView) {
+        super.textViewDidChange(textView)
+        // If the text is not empty, the user is typing
+        isTyping = textView.text != ""
+    }
     
 }
