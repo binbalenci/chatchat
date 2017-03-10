@@ -9,6 +9,7 @@
 import UIKit
 import Firebase
 import JSQMessagesViewController
+import Photos
 
 final class ChatViewController: JSQMessagesViewController {
     
@@ -27,6 +28,11 @@ final class ChatViewController: JSQMessagesViewController {
     private var newMessageRefHandle: FIRDatabaseHandle?
     private lazy var usersTypingQuery: FIRDatabaseQuery =
         self.channelRef!.child("typingIndicator").queryOrderedByValue().queryEqual(toValue: true)
+    lazy var storageRef: FIRStorageReference = FIRStorage.storage().reference(forURL: "gs://chatchat-iosapp-secourse.appspot.com/")
+    private let imageURLNotSetKey = "NOTSET"
+    private var photoMessageMap = [String: JSQPhotoMediaItem]()
+    private var updatedMessageRefHandle: FIRDatabaseHandle?
+
     
     /// NOTE: View Lifecycle
     
@@ -47,6 +53,15 @@ final class ChatViewController: JSQMessagesViewController {
         super.viewDidAppear(animated)
         
         observeTyping()
+    }
+    deinit {
+        if let refHandle = newMessageRefHandle {
+            messageRef.removeObserver(withHandle: refHandle)
+        }
+        
+        if let refHandle = updatedMessageRefHandle {
+            messageRef.removeObserver(withHandle: refHandle)
+        }
     }
     
     /// NOTE: Collection view data source (and related) methods
@@ -98,6 +113,18 @@ final class ChatViewController: JSQMessagesViewController {
         return cell
     }
     
+    private func addPhotoMessage(withId id: String, key: String, mediaItem: JSQPhotoMediaItem) {
+        if let message = JSQMessage(senderId: id, displayName: "", media: mediaItem) {
+            messages.append(message)
+            
+            if (mediaItem.image == nil) {
+                photoMessageMap[key] = mediaItem
+            }
+            
+            collectionView.reloadData()
+        }
+    }
+    
     
     /// NOTE: Firebase related methods
     
@@ -118,8 +145,39 @@ final class ChatViewController: JSQMessagesViewController {
                 
                 // Inform JSQMessagesViewController that a message has been received
                 self.finishReceivingMessage()
+            } else if let id = messageData["senderId"] as String!,
+                let photoURL = messageData["photoURL"] as String! { // Check to see if there is a photoURL set
+                // Create a new JSQPhotoMediaItem. This object encapsulates rich media in messages
+                if let mediaItem = JSQPhotoMediaItem(maskAsOutgoing: id == self.senderId) {
+                    //
+                    self.addPhotoMessage(withId: id, key: snapshot.key, mediaItem: mediaItem)
+                    // Check that the photoURL contains the prefix for a Firebase Storage object
+                    if photoURL.hasPrefix("gs://") {
+                        self.fetchImageDataAtURL(photoURL, forMediaItem: mediaItem, clearsPhotoMessageMapOnSuccessForKey: nil)
+                    }
+                }
             } else {
                 print("Error! Could not decode message data")
+            }
+        })
+        
+        // We can also use the observer method to listen for
+        // changes to existing messages.
+        // We use this to be notified when a photo has been stored
+        // to the Firebase Storage, so we can update the message data
+        updatedMessageRefHandle = messageRef.observe(.childChanged, with: { (snapshot) in
+            let key = snapshot.key
+            // Grabs the message data dictionary from the Firebase snapshot
+            let messageData = snapshot.value as! Dictionary<String, String>
+            
+            // Checks to see if the dictionary has a photoURL key set
+            if let photoURL = messageData["photoURL"] as String! {
+                // The photo has been updated.
+                // Pulls the JSQPhotoMediaItem out of the cache
+                if let mediaItem = self.photoMessageMap[key] {
+                    // Fetch the image data and update the message with the image
+                    self.fetchImageDataAtURL(photoURL, forMediaItem: mediaItem, clearsPhotoMessageMapOnSuccessForKey: key)
+                }
             }
         })
     }
@@ -154,6 +212,62 @@ final class ChatViewController: JSQMessagesViewController {
             // Use a computed property to update localTyping and userIsTypingRef each time it’s changed
             localTyping = newValue
             userIsTypingRef.setValue(newValue)
+        }
+    }
+
+    func sendPhotoMessage() -> String? {
+        let itemRef = messageRef.childByAutoId()
+        
+        let messageItem = [
+            "photoURL": imageURLNotSetKey,
+            "senderId": senderId!,
+            ]
+        
+        itemRef.setValue(messageItem)
+        
+        JSQSystemSoundPlayer.jsq_playMessageSentSound()
+        
+        finishSendingMessage()
+        return itemRef.key
+    }
+    
+    func setImageURL(_ url: String, forPhotoMessageWithKey key: String) {
+        let itemRef = messageRef.child(key)
+        itemRef.updateChildValues(["photoURL": url])
+    }
+    
+    private func fetchImageDataAtURL(_ photoURL: String, forMediaItem mediaItem: JSQPhotoMediaItem, clearsPhotoMessageMapOnSuccessForKey key: String?) {
+        // Get a reference to the stored image
+        let storageRef = FIRStorage.storage().reference(forURL: photoURL)
+        
+        // Get the image data from the storage
+        storageRef.data(withMaxSize: INT64_MAX){ (data, error) in
+            if let error = error {
+                print("Error downloading image data: \(error)")
+                return
+            }
+            
+            // Get the image metadata from the storage
+            storageRef.metadata(completion: { (metadata, metadataErr) in
+                if let error = metadataErr {
+                    print("Error downloading metadata: \(error)")
+                    return
+                }
+                
+                // GIF
+                if (metadata?.contentType == "image/gif") {
+                    //mediaItem.image = UIImage.gifWithData(data!)
+                } else {
+                    mediaItem.image = UIImage.init(data: data!)
+                }
+                self.collectionView.reloadData()
+                
+                // Remove the key from your photoMessageMap
+                guard key != nil else {
+                    return
+                }
+                self.photoMessageMap.removeValue(forKey: key!)
+            })
         }
     }
     
@@ -198,6 +312,17 @@ final class ChatViewController: JSQMessagesViewController {
         isTyping = false
     }
     
+    override func didPressAccessoryButton(_ sender: UIButton) {
+        let picker = UIImagePickerController()
+        picker.delegate = self
+        if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)) {
+            picker.sourceType = UIImagePickerControllerSourceType.camera
+        } else {
+            picker.sourceType = UIImagePickerControllerSourceType.photoLibrary
+        }
+        
+        present(picker, animated: true, completion:nil)
+    }
     
     /// NOTE: UITextViewDelegate methods
     
@@ -207,4 +332,69 @@ final class ChatViewController: JSQMessagesViewController {
         isTyping = textView.text != ""
     }
     
+}
+
+/// NOTE: Image Picker Delegate
+extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController,
+                               didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        picker.dismiss(animated: true, completion:nil)
+        
+        // Check to see if a photo URL is present in the info dictionary
+        if let photoReferenceUrl = info[UIImagePickerControllerReferenceURL] as? URL {
+            // Handle picking a Photo from the Photo Library
+            // Pull the PHAsset from the photo URL
+            let assets = PHAsset.fetchAssets(withALAssetURLs: [photoReferenceUrl], options: nil)
+            let asset = assets.firstObject
+            
+            // Call sendPhotoMessage and receive the Firebase key
+            if let key = sendPhotoMessage() {
+                // Get the file URL for the image
+                asset?.requestContentEditingInput(with: nil, completionHandler: { (contentEditingInput, info) in
+                    let imageFileURL = contentEditingInput?.fullSizeImageURL
+                    
+                    // Create a unique path based on the user’s unique ID and the current time
+                    let path = "\(FIRAuth.auth()?.currentUser?.uid)/\(Int(Date.timeIntervalSinceReferenceDate * 1000))/\(photoReferenceUrl.lastPathComponent)"
+                    
+                    // Save the image file to Firebase Storage
+                    self.storageRef.child(path).putFile(imageFileURL!, metadata: nil) { (metadata, error) in
+                        if let error = error {
+                            print("Error uploading photo: \(error.localizedDescription)")
+                            return
+                        }
+                        // Update your photo message with the correct URL
+                        self.setImageURL(self.storageRef.child((metadata?.path)!).description, forPhotoMessageWithKey: key)
+                    }
+                })
+            }
+        } else {
+            // Handle picking a Photo from the Camera
+            // Grab the image from the info dictionary
+            let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+            // Save the fake image URL to Firebase
+            if let key = sendPhotoMessage() {
+                // Get a JPEG representation of the photo
+                let imageData = UIImageJPEGRepresentation(image, 1.0)
+                // Create a unique URL based on the user’s unique id and the current time
+                let imagePath = FIRAuth.auth()!.currentUser!.uid + "/\(Int(Date.timeIntervalSinceReferenceDate * 1000)).jpg"
+                // Create a FIRStorageMetadata object and set the metadata to image/jpeg
+                let metadata = FIRStorageMetadata()
+                metadata.contentType = "image/jpeg"
+                // Save the photo to Firebase Storage
+                storageRef.child(imagePath).put(imageData!, metadata: metadata) { (metadata, error) in
+                    if let error = error {
+                        print("Error uploading photo: \(error)")
+                        return
+                    }
+                    //
+                    self.setImageURL(self.storageRef.child((metadata?.path)!).description, forPhotoMessageWithKey: key)
+                }
+            }
+        }
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion:nil)
+    }
 }
