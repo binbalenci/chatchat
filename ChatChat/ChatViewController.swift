@@ -21,6 +21,10 @@ final class ChatViewController: JSQMessagesViewController {
         }
     }
     var messages = [JSQMessage]()
+    lazy var outgoingBubbleImageView: JSQMessagesBubbleImage = self.setupOutgoingBubble()
+    lazy var incomingBubbleImageView: JSQMessagesBubbleImage = self.setupIncomingBubble()
+    private lazy var messageRef: FIRDatabaseReference = self.channelRef!.child("messages")
+    private var newMessageRefHandle: FIRDatabaseHandle?
     
     /// NOTE: View Lifecycle
     
@@ -29,11 +33,18 @@ final class ChatViewController: JSQMessagesViewController {
         
         // Set the senderId based on the logged in Firebase user.
         self.senderId = FIRAuth.auth()?.currentUser?.uid
+        
+        // No avatars
+        collectionView!.collectionViewLayout.incomingAvatarViewSize = CGSize.zero
+        collectionView!.collectionViewLayout.outgoingAvatarViewSize = CGSize.zero
+        
+        observeMessages()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-    }
+        
+        }
     
     /// NOTE: Collection view data source (and related) methods
     
@@ -49,11 +60,105 @@ final class ChatViewController: JSQMessagesViewController {
         return messages.count
     }
     
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageBubbleImageDataForItemAt indexPath: IndexPath!) -> JSQMessageBubbleImageDataSource! {
+        // Retrieve the message
+        let message = messages[indexPath.item]
+        // If the message was sent by the local user, return the outgoing image view
+        if message.senderId == senderId {
+            return outgoingBubbleImageView
+        // Otherwise, return the incoming image view
+        } else {
+            return incomingBubbleImageView
+        }
+    }
+    
+    // Remove the avatar image
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, avatarImageDataForItemAt indexPath: IndexPath!) -> JSQMessageAvatarImageDataSource! {
+        return nil
+    }
+    
+    private func addMessage(withId id: String, name: String, text: String) {
+        if let message = JSQMessage(senderId: id, displayName: name, text: text) {
+            messages.append(message)
+        }
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! JSQMessagesCollectionViewCell
+        let message = messages[indexPath.item]
+        
+        if message.senderId == senderId {
+            cell.textView?.textColor = UIColor.white
+        } else {
+            cell.textView?.textColor = UIColor.black
+        }
+        return cell
+    }
+    
     
     /// NOTE: Firebase related methods
     
+    private func observeMessages() {
+        messageRef = channelRef!.child("messages")
+        // Creating a query that limits the synchronization to the last 25 messages
+        let messageQuery = messageRef.queryLimited(toLast:25)
+        
+        // We can use the observe method to listen for new
+        // messages being written to the Firebase DB
+        newMessageRefHandle = messageQuery.observe(.childAdded, with: { (snapshot) -> Void in
+            // Extract the messageData from the snapshot
+            let messageData = snapshot.value as! Dictionary<String, String>
+            
+            if let id = messageData["senderId"] as String!, let name = messageData["senderName"] as String!, let text = messageData["text"] as String!, text.characters.count > 0 {
+                
+                self.addMessage(withId: id, name: name, text: text)
+                
+                // Inform JSQMessagesViewController that a message has been received
+                self.finishReceivingMessage()
+            } else {
+                print("Error! Could not decode message data")
+            }
+        })
+    }
+    
     
     /// NOTE: UI and User Interaction
+    
+    /* 
+     The messages displayed in the collection view are images with text overlaid
+     Outgoing messages are displayed to the right and incoming messages on the left.
+     */
+    private func setupOutgoingBubble() -> JSQMessagesBubbleImage {
+        let bubbleImageFactory = JSQMessagesBubbleImageFactory()
+        // Set outgoing message overlay to be blue
+        return bubbleImageFactory!.outgoingMessagesBubbleImage(with: UIColor(netHex: 0xF5A623))
+    }
+    
+    private func setupIncomingBubble() -> JSQMessagesBubbleImage {
+        let bubbleImageFactory = JSQMessagesBubbleImageFactory()
+        // Set incoming message overlay to be light gray
+        return bubbleImageFactory!.incomingMessagesBubbleImage(with: UIColor.jsq_messageBubbleLightGray())
+    }
+    
+    override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
+        // Using childByAutoId() to create a child reference with a unique key
+        let itemRef = messageRef.childByAutoId()
+        // Create a dictionary to represent the message.
+        let messageItem = [
+            "senderId": senderId!,
+            "senderName": senderDisplayName!,
+            "text": text!,
+            ]
+        
+        // Save the value at the new child location
+        itemRef.setValue(messageItem)
+        
+        // Play the canonical “message sent” sound
+        JSQSystemSoundPlayer.jsq_playMessageSentSound()
+        
+        // Reset the input toolbar to empty
+        finishSendingMessage()
+    }
     
     
     /// NOTE: UITextViewDelegate methods
