@@ -18,6 +18,7 @@
 		678CF1DF1E70680600A8D2C5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 678CF1DC1E70680600A8D2C5 /* Main.storyboard */; };
 		678CF1E71E71C46E00A8D2C5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 678CF1E61E71C46E00A8D2C5 /* GoogleService-Info.plist */; };
 		678CF1E91E71D97A00A8D2C5 /* RoundedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678CF1E81E71D97A00A8D2C5 /* RoundedButton.swift */; };
+		678CF1EB1E71F4CA00A8D2C5 /* App Development Steps in Resources */ = {isa = PBXBuildFile; fileRef = 678CF1EA1E71F4CA00A8D2C5 /* App Development Steps */; };
 		D3EA89D672AE078FA57FE29E /* Pods_ChatChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5A010DA4B18E8AC450CDFEC /* Pods_ChatChat.framework */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,7 @@
 		678CF1DD1E70680600A8D2C5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		678CF1E61E71C46E00A8D2C5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		678CF1E81E71D97A00A8D2C5 /* RoundedButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundedButton.swift; sourceTree = "<group>"; };
+		678CF1EA1E71F4CA00A8D2C5 /* App Development Steps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "App Development Steps"; sourceTree = "<group>"; };
 		79B823DB17C493527CEF3ECD /* Pods-ChatChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ChatChat.release.xcconfig"; path = "Pods/Target Support Files/Pods-ChatChat/Pods-ChatChat.release.xcconfig"; sourceTree = "<group>"; };
 		C5A010DA4B18E8AC450CDFEC /* Pods_ChatChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ChatChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E68A930CDA2A3102A473E781 /* Pods-ChatChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ChatChat.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ChatChat/Pods-ChatChat.debug.xcconfig"; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 				678CF1E61E71C46E00A8D2C5 /* GoogleService-Info.plist */,
 				678CF1C51E7058CD00A8D2C5 /* Info.plist */,
 				678CF1B91E7058CD00A8D2C5 /* AppDelegate.swift */,
+				678CF1EA1E71F4CA00A8D2C5 /* App Development Steps */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -212,6 +215,7 @@
 				678CF1DF1E70680600A8D2C5 /* Main.storyboard in Resources */,
 				678CF1E71E71C46E00A8D2C5 /* GoogleService-Info.plist in Resources */,
 				678CF1C11E7058CD00A8D2C5 /* Assets.xcassets in Resources */,
+				678CF1EB1E71F4CA00A8D2C5 /* App Development Steps in Resources */,
 				678CF1DE1E70680600A8D2C5 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

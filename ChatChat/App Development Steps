@@ -1,0 +1,11 @@
+Pod -> Create a Firebase Account -> Enabling Anonymous Authentication -> Logging In
+
+-> Creating the Channels List -> Firebase Data Structure -> Realtime Channel Synchronization
+
+-> Creating the Chat Interface -> Setting Up the Data Source and Delegate for Message
+
+-> Message Bubble Colors -> Setting the Bubble Images -> Removing the Avatars -> Creating Messages
+
+-> Message Bubble Text -> Sending Messages -> Synchronizing the Data Source
+
+-> Knowing When a User is Typing -> Querying for Typing Users -> Sending Images -> Displaying the Images

@@ -20,6 +20,7 @@ final class ChatViewController: JSQMessagesViewController {
             title = channel?.name
         }
     }
+    var messages = [JSQMessage]()
     
     /// NOTE: View Lifecycle
     
@@ -35,6 +36,18 @@ final class ChatViewController: JSQMessagesViewController {
     }
     
     /// NOTE: Collection view data source (and related) methods
+    
+    /*
+     The first is much like collectionView(_:cellForItemAtIndexPath:), but for message data
+     The second is the standard way to return the number of messsages
+     */
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {
+        return messages[indexPath.item]
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return messages.count
+    }
     
     
     /// NOTE: Firebase related methods
