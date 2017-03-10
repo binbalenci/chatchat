@@ -41,7 +41,7 @@
                                     <action selector="loginBtnPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="vqf-6j-KfK"/>
                                 </connections>
                             </button>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ChatChatIcon" translatesAutoresizingMaskIntoConstraints="NO" id="lln-YT-rwL">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="AppLogo" translatesAutoresizingMaskIntoConstraints="NO" id="lln-YT-rwL">
                                 <rect key="frame" x="0.0" y="20" width="414" height="270"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="270" id="tGS-Se-awh"/>
@@ -234,6 +234,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="ChatChatIcon" width="260" height="260"/>
+        <image name="AppLogo" width="260" height="260"/>
     </resources>
 </document>

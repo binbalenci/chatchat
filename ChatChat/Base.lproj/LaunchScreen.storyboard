@@ -21,7 +21,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ChatChatIcon" translatesAutoresizingMaskIntoConstraints="NO" id="3wP-uX-TdS">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="AppLogo" translatesAutoresizingMaskIntoConstraints="NO" id="3wP-uX-TdS">
                                 <rect key="frame" x="58" y="198" width="260" height="270"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="270" id="cpB-t0-1rC"/>
@@ -41,6 +41,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="ChatChatIcon" width="260" height="260"/>
+        <image name="AppLogo" width="260" height="260"/>
     </resources>
 </document>
