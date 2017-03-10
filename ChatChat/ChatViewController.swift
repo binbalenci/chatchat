@@ -125,6 +125,46 @@ final class ChatViewController: JSQMessagesViewController {
         }
     }
     
+    // View username above chat bubble
+
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, attributedTextForMessageBubbleTopLabelAt indexPath: IndexPath!) -> NSAttributedString! {
+        let message = messages[indexPath.item]
+        
+        // Sent by me, skip
+        if message.senderDisplayName == senderDisplayName {
+            return nil;
+        }
+        
+        // Same as previous sender, skip
+        if indexPath.item > 0 {
+            let previousMessage = messages[indexPath.item - 1];
+            if previousMessage.senderDisplayName == message.senderDisplayName {
+                return nil;
+            }
+        }
+        
+        return NSAttributedString(string:message.senderDisplayName)
+    }
+    
+    override func collectionView(_ collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForMessageBubbleTopLabelAt indexPath: IndexPath!) -> CGFloat {
+        let message = messages[indexPath.item]
+        
+        // Sent by me, skip
+        if message.senderDisplayName == senderDisplayName {
+            return CGFloat(0.0);
+        }
+        
+        // Same as previous sender, skip
+        if indexPath.item > 0 {
+            let previousMessage = messages[indexPath.item - 1];
+            if previousMessage.senderDisplayName == message.senderDisplayName {
+                return CGFloat(0.0);
+            }
+        }
+        
+        return kJSQMessagesCollectionViewCellLabelHeightDefault
+    }
+    
     
     /// NOTE: Firebase related methods
     
