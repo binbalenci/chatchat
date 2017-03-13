@@ -1,7 +1,7 @@
 
 .DS_Store
 *.xcuserstate
-project.xcworkspace/
+ChatChat.xcworkspace/
 xcuserdata/
 Pods/
 Podfile.lock
