@@ -14,8 +14,9 @@ class LoginViewController: UIViewController {
     /// NOTE: Properties
     
     @IBOutlet weak var nameField: UITextField!
+    @IBOutlet weak var passwordField: UITextField!
     @IBOutlet weak var bottomLayoutGuideConstraint: NSLayoutConstraint!
-    
+    @IBOutlet weak var backgroundImg: UIImageView!
     
     /// NOTE: View Lifecycle
     
@@ -56,11 +57,13 @@ class LoginViewController: UIViewController {
         let keyboardEndFrame = ((notification as NSNotification).userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         let convertedKeyboardEndFrame = view.convert(keyboardEndFrame, from: view.window)
         bottomLayoutGuideConstraint.constant = view.bounds.maxY - convertedKeyboardEndFrame.minY
+        backgroundImg.alpha = 0.5
     }
     
     // Move it back down
     func keyboardWillHideNotification(_ notification: Notification) {
-        bottomLayoutGuideConstraint.constant = 125
+        bottomLayoutGuideConstraint.constant = 91
+        backgroundImg.alpha = 1
     }
  
     
