@@ -17,6 +17,7 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var loginPasswordField: UITextField!
     @IBOutlet weak var bottomLayoutGuideConstraint: NSLayoutConstraint!
     @IBOutlet weak var backgroundImg: UIImageView!
+    @IBOutlet weak var stateMessage: UILabel!
     
     /// NOTE: View Lifecycle
     
@@ -44,15 +45,19 @@ class LoginViewController: UIViewController {
     
     @IBAction func loginBtnPressed(_ sender: AnyObject) {
         
-        FIRAuth.auth()!.signIn(withEmail: self.loginEmailField.text!, password: self.loginPasswordField.text!) { (user, error) in
-            // Check to see if there is an authentication error
-            if let err = error {
-                print(err.localizedDescription)
-                return
+        if(checkTextFieldEmpty(textField: loginEmailField.text) || checkTextFieldEmpty(textField: loginPasswordField.text)) {
+            stateMessage.text = "Please check your username/password and try again."
+        } else {
+            FIRAuth.auth()!.signIn(withEmail: self.loginEmailField.text!, password: self.loginPasswordField.text!) { (user, error) in
+                // Check to see if there is an authentication error
+                if let err = error {
+                    print(err.localizedDescription)
+                    return
+                }
+                
+                // Trigger the segue to move to the ChannelListViewController
+                self.performSegue(withIdentifier: "LoginToChat", sender: nil)
             }
-            
-            // Trigger the segue to move to the ChannelListViewController
-            self.performSegue(withIdentifier: "LoginToChat", sender: nil)
         }
         
     }
@@ -73,11 +78,9 @@ class LoginViewController: UIViewController {
                                         FIRAuth.auth()!.createUser(withEmail: emailField.text!,
                                                                    password: passwordField.text!) { user, error in
                                                                     if error == nil {
-                                                                        FIRAuth.auth()!.signIn(withEmail: self.loginEmailField.text!,
-                                                                                               password: self.loginPasswordField.text!)
-                                                                        //                                                                        let alert2 = UIAlertController(title: "Successful Registered", message: "", preferredStyle: .alert)
-                                                                        //                                                                        alert2.addAction(cancelAction)
-                                                                        //                                                                        self.present(alert2, animated: true, completion: nil)
+                                                                        self.stateMessage.text = "User successfully registered, please log in to chat!"
+                                                                    } else {
+                                                                        self.stateMessage.text = error?.localizedDescription
                                                                     }
                                         }
         }
@@ -126,6 +129,17 @@ class LoginViewController: UIViewController {
         
         // Set the senderDisplayName in the ChannelListViewController to the name provided in the nameField by the user.
         channelVc.senderDisplayName = loginEmailField?.text
+    }
+    
+    /// NOTE: Supporting Functions
+    
+    // Check if the text field is empty
+    func checkTextFieldEmpty(textField: String?) -> Bool{
+        if(textField == "" || textField == nil) {
+            return true
+        }
+        
+        return false
     }
 }
 
