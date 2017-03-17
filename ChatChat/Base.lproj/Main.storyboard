@@ -95,6 +95,9 @@
                                 <state key="normal" title="Sign up">
                                     <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
+                                <connections>
+                                    <action selector="signUpBtnPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="HjP-ac-ica"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JIn-ew-tdp" customClass="RoundedButton" customModule="ChatChat" customModuleProvider="target">
                                 <rect key="frame" x="47.5" y="488" width="280" height="50"/>
@@ -139,14 +142,14 @@
                     <connections>
                         <outlet property="backgroundImg" destination="lln-YT-rwL" id="qKV-96-ZN9"/>
                         <outlet property="bottomLayoutGuideConstraint" destination="nCj-tV-6Si" id="q7f-18-DV9"/>
-                        <outlet property="nameField" destination="5Ud-se-jh6" id="VUy-ik-PQf"/>
-                        <outlet property="passwordField" destination="5Ud-se-jh6" id="4FC-gy-x9F"/>
+                        <outlet property="loginEmailField" destination="Kpi-wi-cRi" id="MKp-k2-Hr2"/>
+                        <outlet property="loginPasswordField" destination="5Ud-se-jh6" id="2QD-gr-njm"/>
                         <segue destination="8CN-Ua-xvG" kind="presentation" identifier="LoginToChat" id="C1q-pb-YWz"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="319" y="388"/>
+            <point key="canvasLocation" x="63" y="388"/>
         </scene>
         <!--Channel List View Controller-->
         <scene sceneID="bg1-OT-nd2">

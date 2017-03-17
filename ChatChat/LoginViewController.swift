@@ -13,12 +13,22 @@ class LoginViewController: UIViewController {
     
     /// NOTE: Properties
     
-    @IBOutlet weak var nameField: UITextField!
-    @IBOutlet weak var passwordField: UITextField!
+    @IBOutlet weak var loginEmailField: UITextField!
+    @IBOutlet weak var loginPasswordField: UITextField!
     @IBOutlet weak var bottomLayoutGuideConstraint: NSLayoutConstraint!
     @IBOutlet weak var backgroundImg: UIImageView!
     
     /// NOTE: View Lifecycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        //        FIRAuth.auth()!.addStateDidChangeListener() { auth, user in
+        //            if user != nil {
+        //                self.performSegue(withIdentifier: "LoginToChat", sender: nil)
+        //            }
+        //        }
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -33,20 +43,58 @@ class LoginViewController: UIViewController {
     }
     
     @IBAction func loginBtnPressed(_ sender: AnyObject) {
-        // Confirm the name is not empty
-        if nameField?.text != "" {
-            // Use the Firebase Auth API to sign in anonymously
-            FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
-                // Check to see if there is an authentication error
-                if let err = error {
-                    print(err.localizedDescription)
-                    return
-                }
-                
-               // Trigger the segue to move to the ChannelListViewController
-                self.performSegue(withIdentifier: "LoginToChat", sender: nil)
-            })
+        
+        FIRAuth.auth()!.signIn(withEmail: self.loginEmailField.text!, password: self.loginPasswordField.text!) { (user, error) in
+            // Check to see if there is an authentication error
+            if let err = error {
+                print(err.localizedDescription)
+                return
+            }
+            
+            // Trigger the segue to move to the ChannelListViewController
+            self.performSegue(withIdentifier: "LoginToChat", sender: nil)
         }
+        
+    }
+    
+    @IBAction func signUpBtnPressed(_ sender: AnyObject) {
+        let alert = UIAlertController(title: "Register",
+                                      message: "",
+                                      preferredStyle: .alert)
+        
+        let cancelAction = UIAlertAction(title: "Cancel",
+                                         style: .default)
+        
+        let saveAction = UIAlertAction(title: "Save",
+                                       style: .default) { action in
+                                        let emailField = alert.textFields![0]
+                                        let passwordField = alert.textFields![1]
+                                        
+                                        FIRAuth.auth()!.createUser(withEmail: emailField.text!,
+                                                                   password: passwordField.text!) { user, error in
+                                                                    if error == nil {
+                                                                        FIRAuth.auth()!.signIn(withEmail: self.loginEmailField.text!,
+                                                                                               password: self.loginPasswordField.text!)
+                                                                        //                                                                        let alert2 = UIAlertController(title: "Successful Registered", message: "", preferredStyle: .alert)
+                                                                        //                                                                        alert2.addAction(cancelAction)
+                                                                        //                                                                        self.present(alert2, animated: true, completion: nil)
+                                                                    }
+                                        }
+        }
+        
+        alert.addTextField { textEmail in
+            textEmail.placeholder = "Enter your email"
+        }
+        
+        alert.addTextField { textPassword in
+            textPassword.isSecureTextEntry = true
+            textPassword.placeholder = "Enter your password"
+        }
+        
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        
+        self.present(alert, animated: true, completion: nil)
     }
     
     
@@ -65,7 +113,7 @@ class LoginViewController: UIViewController {
         bottomLayoutGuideConstraint.constant = 91
         backgroundImg.alpha = 1
     }
- 
+    
     
     /// NOTE: Navigation
     
@@ -77,8 +125,21 @@ class LoginViewController: UIViewController {
         let channelVc = navVc.viewControllers.first as! ChannelListViewController
         
         // Set the senderDisplayName in the ChannelListViewController to the name provided in the nameField by the user.
-        channelVc.senderDisplayName = nameField?.text
+        channelVc.senderDisplayName = loginEmailField?.text
     }
 }
 
 
+extension LoginViewController: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == loginEmailField {
+            loginPasswordField.becomeFirstResponder()
+        }
+        if textField == loginPasswordField {
+            textField.resignFirstResponder()
+        }
+        return true
+    }
+    
+}
