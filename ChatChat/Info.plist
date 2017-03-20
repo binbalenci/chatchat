@@ -24,10 +24,10 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We access your photos to attach images to meesages</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera usage description</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We access your photos to attach images to meesages</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
