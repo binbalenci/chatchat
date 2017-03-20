@@ -7,7 +7,7 @@ The application was developed using Swift 3.
 ## Preview
 <img src="./Screenshots/screenshot_login.PNG" align="left" alt="Log In Screen" height="450">
 <img src="./Screenshots/screenshot_channel.PNG" align="left" alt="List of chat channels available" height="450">
-<img src="./Screenshots/screenshot_chatsample.PNG" alt="A sample conversation" height="450">
+<img src="./Screenshots/screenshot_chatsample2.PNG" alt="A sample conversation" height="450">
 
 ## Dependencies
 * [JSQMessageViewController](https://github.com/jessesquires/JSQMessagesViewController)
