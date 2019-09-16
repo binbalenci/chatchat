@@ -34,4 +34,4 @@ In order to use the application, the user must register for an account via email
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at <https://github.com/binhbui411/ChatChat-iOSApp>.
+Bug reports and pull requests are welcome.
